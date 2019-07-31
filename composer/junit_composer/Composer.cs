@@ -39,6 +39,15 @@ namespace junit_composer
             return elements;
         }
 
+
+        private static void print_x_elements(List<XElement> nodes)
+        {
+            foreach (XElement n in nodes)
+            {
+                Console.WriteLine(n.ToString());
+            }
+        }
+
         // returns one or more testsuite classes.
         private static List<XElement> ExtractTestSuites(string filename)
         {
@@ -63,9 +72,38 @@ namespace junit_composer
                     throw new BadJunitFileException(unexpected_child_elt);
                 }
             }
+            print_x_elements(test_suite_objects); 
             return test_suite_objects;
         }
 
+
+        private static List<XElement> ExtractTestCases(string filename)
+        {
+            List<XElement> test_objects = new List<XElement>();
+            List<XElement> xelt_list = ExtractTestSuites(filename);
+            // we know they're all testsuite objects. We can extract the test cases only
+            // and return those. Then manually build the suite and header.
+            foreach (XElement xelt in xelt_list)
+            {
+                test_objects.AddRange(xelt.Descendants("testcase"));
+            }
+            return test_objects;
+        }
+
+        private static XDocument build_test_case_document(List<XElement> test_cases)
+        {
+            XDocument res_doc = new XDocument(
+                new XDeclaration("1.0", "utf-8", "yes")
+                );
+            res_doc.Add(new XElement(testsuite));
+
+            foreach (XElement xelt in test_cases.Descendants(testsuite))
+            {
+                // adding to XDocument not List. No AddAll().
+                res_doc.Add(xelt);
+            }
+            return res_doc;
+        }
 
 
         // public functions:
@@ -80,12 +118,11 @@ namespace junit_composer
         /// </returns>
         public static string ComposeTestSuites(params string[] targets)
         {
+            List<XElement> test_suites = new List<XElement>();
             foreach (string target in targets)
             {
-                ExtractTestSuites(filename: target);
+                test_suites.AddRange(ExtractTestSuites(filename: target));
             }
-
-
             return "";
         }
 
@@ -99,6 +136,12 @@ namespace junit_composer
         /// </returns>
         public static string ComposeTestCases(params string[] targets)
         {
+            List<XElement> test_cases = new List<XElement>();
+            foreach (string target in targets)
+            {
+                test_cases.AddRange(ExtractTestCases(target));
+            }
+            XDocument test_case_doc = build_test_case_document(test_cases);
 
             return "";
         }

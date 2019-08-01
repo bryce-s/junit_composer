@@ -6,4 +6,4 @@ install:
   - nuget install NUnit.Runners -OutputDirectory testrunner
 script: 
   - msbuild ./composer/composer.sln
-  - nunit-console Tests/bin/Release/Tests.dll
+  - nunit-console /home/travis/build/bryce-s/junit_composer/test/bin/Debug/test.dll

@@ -118,6 +118,7 @@ namespace junit_composer
         }
 
 
+        // returns a testsuite xelement
         private static XElement add_single_testsuite(XDocument res_doc)
         {
             // we grab the testsuites elt:
@@ -126,21 +127,51 @@ namespace junit_composer
 
             //we greab the testsuite elt:
             XElement testsuite_obj = return_xelement(xelt: testsuites_obj);
-            return testsuites_obj;
+            return testsuite_obj;
         }
 
-        private static XDocument build_test_case_document(List<XElement> test_cases)
+        private static XDocument build_test_suite_only(List<XElement> test_cases)
         {
             XDocument res_doc = set_up_junit_document();
 
             // we grab the testsuite elt:
-            XElement testsuite_obj = add_single_testsuite(res_doc);
+            IEnumerator<XElement> testsuites_iter = res_doc.Descendants(testsuites).GetEnumerator();
+            testsuites_iter.MoveNext();
+            XElement testsuites_obj = testsuites_iter.Current;
 
-            // add all testcase elemnts to the testsuite:
-            foreach (XElement xelt in test_cases.Descendants(testsuite))
+            int total_test_count = 0;
+            int total_failure_count = 0;
+            int total_error_count = 0;
+
+            // add all testsuite element to the testsuites:
+            foreach (XElement testsuite in test_cases)
             {
-                testsuite_obj.Add(xelt);
+                testsuites_obj.Add(testsuite);
+                XAttribute tests = testsuite.Attribute("tests");
+                XAttribute failures = testsuite.Attribute("failures");
+                XAttribute errors = testsuite.Attribute("errors");
+                try
+                {
+                    if (tests != null)
+                    {
+                        total_test_count += Convert.ToInt32(tests.Value.ToString());
+                    }
+                    if (errors != null)
+                    {
+                        total_error_count += Convert.ToInt32(errors.Value.ToString());
+                    }
+                    if (failures != null)
+                    {
+                        total_failure_count += Convert.ToInt32(failures.Value.ToString());
+                    }
+                } catch (InvalidCastException e)
+                {
+                    throw (new BadJunitFileException("testsuite element attributes for tests, value, error must be integers."));
+                }
             }
+            testsuites_obj.Add(new XAttribute("tests", total_test_count.ToString()));
+            testsuites_obj.Add(new XAttribute("failures", total_failure_count.ToString()));
+            testsuites_obj.Add(new XAttribute("errors", total_error_count.ToString()));
             return res_doc;
         }
 
@@ -153,9 +184,17 @@ namespace junit_composer
             foreach (XElement suite in test_suites)
             {
                 test_suite.Add(suite);
+                
             }
             return res_doc;
         }
+
+
+        private static string append_encoding(XDocument doc)
+        {
+            return String.Format("{0}{1}{2}", doc.Declaration.ToString(), Environment.NewLine, doc.ToString());
+        }
+
 
         // public functions:
         public static List<string> gather_junit_files()
@@ -179,8 +218,8 @@ namespace junit_composer
             {
                 test_suites.AddRange(ExtractTestSuites(filename: target));
             }
-            XDocument test_suite_doc = build_test_case_document(test_suites);
-            return test_suite_doc.ToString();
+            XDocument test_suite_doc = build_test_suite_only(test_suites);
+            return append_encoding(test_suite_doc);
         }
 
 
@@ -198,9 +237,9 @@ namespace junit_composer
             {
                 test_cases.AddRange(ExtractTestCases(target));
             }
-            XDocument test_case_doc = build_test_case_document(test_cases);
+            XDocument test_case_doc = build_test_suite_only(test_cases);
 
-            return test_case_doc.ToString();
+            return append_encoding(test_case_doc);
         }
        
     }

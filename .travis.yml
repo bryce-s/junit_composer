@@ -1,6 +1,7 @@
 language: csharp
 solution: "./composer/composer.sln"
 install:
+  - sudo apt-get install nunit-console
   - nuget restore "./composer/composer.sln"
   - nuget install NUnit.Runners -OutputDirectory testrunner
 script: 

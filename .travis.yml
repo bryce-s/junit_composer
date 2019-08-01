@@ -4,6 +4,4 @@ install:
   - nuget restore "./composer/composer.sln"
   - nuget install NUnit.Runners -OutputDirectory testrunner
 script: 
-  xbuild ./composer/composer.sln
-  mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./test/bin/Debug/test.dll
-  
+  msbuild ./composer/composer.sln

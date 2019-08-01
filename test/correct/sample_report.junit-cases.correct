@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<testsuite tests="1" failures="1" errors="1">
+  <testcase name="Basic_test" time="0" classname="test_ui.Rxn1000.Multi.Bio.Emulator">
+    <error message="The test case has errors."><![CDATA[---[Failure] target profile not found.---
+	[modulepath] test_ui\Rxn1000.Multi.Bio.Emulator\Basic_test\rxn1000_multibio
+	[codefile] C:\Users\kosi_dev\Raman\Test\UiTests\test_ui\ProfileSwitchers\ProfileSwitcher.cs
+	[codeline] 91
+	[loglvl] Failure
+
+---[Error] The module has failed because one or more actions have failed.---
+	[modulepath] test_ui\Rxn1000.Multi.Bio.Emulator\Basic_test\rxn1000_multibio
+	[loglvl] Error
+
+]]></error>
+    <system-err><![CDATA[---[Failure] target profile not found.---
+	[modulepath] test_ui\Rxn1000.Multi.Bio.Emulator\Basic_test\rxn1000_multibio
+	[codefile] C:\Users\kosi_dev\Raman\Test\UiTests\test_ui\ProfileSwitchers\ProfileSwitcher.cs
+	[codeline] 91
+	[loglvl] Failure
+
+---[Error] The module has failed because one or more actions have failed.---
+	[modulepath] test_ui\Rxn1000.Multi.Bio.Emulator\Basic_test\rxn1000_multibio
+	[loglvl] Error
+
+]]></system-err>
+    <system-out><![CDATA[---[Failure] target profile not found.---
+	[codefile] C:\Users\kosi_dev\Raman\Test\UiTests\test_ui\ProfileSwitchers\ProfileSwitcher.cs
+-----------------------------------------
+---[Info] Waiting for 0ms.---
+	[timeout] 0
+-----------------------------
+---[Error] The module has failed because one or more actions have failed.---
+----------------------------------------------------------------------------
+]]></system-out>
+  </testcase>
+</testsuite>

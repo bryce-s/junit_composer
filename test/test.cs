@@ -12,6 +12,8 @@ namespace test
 
         private string spec_example = "spec_example.junit";
 
+        private string sample_report = "sample_report.junit";
+
         private string mode_cases = "cases";
         private string mode_suites = "suites";
 
@@ -23,7 +25,7 @@ namespace test
         static private string build_filename(string test_target)
         {
             string context = get_test_cwd();
-            string test_target_path = String.Format("test_files{0}spec_example.junit", Path.DirectorySeparatorChar);
+            string test_target_path = String.Format("test_files{0}{1}", Path.DirectorySeparatorChar, test_target);
             return Path.Combine(context, test_target_path);
         }
 
@@ -77,8 +79,8 @@ namespace test
         [Test]
         public void log_correct_tests()
         {
-            bool correct = false;
-            if (correct)
+            bool active = false;
+            if (active)
             {
                 string suites_res = Composer.ComposeTestSuites(build_filename(spec_example));
                 string cases_res = Composer.ComposeTestCases(build_filename(spec_example));
@@ -87,8 +89,17 @@ namespace test
                 write_result_to_file(cases_res, cases_target);
                 write_result_to_file(suites_res, suites_target);
 
+                string suites_sample_res = Composer.ComposeTestSuites(build_filename(sample_report));
+                string cases_sample_res = Composer.ComposeTestCases(build_filename(sample_report));
+
+                string cases_sample_target = String.Format("correct{0}{1}-{2}.correct", Path.DirectorySeparatorChar, sample_report, mode_cases);
+                string suites_sample_target = String.Format("correct{0}{1}-{2}.correct", Path.DirectorySeparatorChar, sample_report, mode_suites);
+                write_result_to_file(suites_sample_res, suites_sample_target);
+                write_result_to_file(cases_sample_res, cases_sample_target);
+               
+
             }
-            Assert.False(correct);
+            Assert.False(active);
 
         }
 
@@ -140,6 +151,42 @@ namespace test
             string res = Composer.ComposeTestCases(build_filename(spec_example));
             string correct_string_unsanitized = read_correct_file(spec_example, mode_cases);
             Assert.True(diff_stings(res, correct_string_unsanitized));
+        }
+
+
+        [Test]
+        public void cases_sample_report_diff()
+        {
+            string res = Composer.ComposeTestCases(build_filename(sample_report));
+            string correct_string_unsanitized = read_correct_file(sample_report, mode_cases);
+            Assert.True(diff_stings(res, correct_string_unsanitized));
+
+        }
+
+
+        [Test]
+        public void suites_sample_report_diff()
+        {
+            string res = Composer.ComposeTestCases(build_filename(sample_report));
+            string correct_string_unsanitized = read_correct_file(sample_report, mode_cases);
+            Assert.True(diff_stings(res, correct_string_unsanitized));
+        }
+
+        [Test]
+        public void cases_sample_report_tags()
+        {
+            string res = Composer.ComposeTestCases(build_filename(sample_report));
+            Assert.True(res.Contains("<testsuite tests=\"1\" failures=\"1\" errors=\"1\">"));
+            Assert.True(res.Contains("<testcase name=\"Basic_test\" time=\"0\" classname=\"test_ui.Rxn1000.Multi.Bio.Emulator\">"));
+        }
+
+        [Test]
+        public void suites_sample_report_tags()
+        {
+            string res = Composer.ComposeTestSuites(build_filename(sample_report));
+            Assert.True(res.Contains("<testsuites tests=\"1\" failures=\"1\" errors=\"1\">"));
+            Assert.True(res.Contains("<testsuite name=\"test_ui\" tests=\"1\" failures=\"1\" errors=\"1\" time=\"1\" skipped=\"0\" timestamp=\"2019-07-26T19:53:23\" hostname=\"DESKTOP-JK3JHVC\">"));
+
         }
 
 

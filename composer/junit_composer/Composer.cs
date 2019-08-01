@@ -29,10 +29,10 @@ namespace junit_composer
 
         // .Select() not working for Xelement doc, will use helper:
 
-        private static List<T> IEnumerableToList<T>(IEnumerable<T> nodes)
+        private static List<Type> IEnumerableToList<Type>(IEnumerable<Type> nodes)
         {
-            List<T> elements = new List<T>();
-            foreach (T xelt in nodes)
+            List<Type> elements = new List<Type>();
+            foreach (Type xelt in nodes)
             {
                 elements.Add(xelt);
             }
@@ -72,7 +72,6 @@ namespace junit_composer
                     throw new BadJunitFileException(unexpected_child_elt);
                 }
             }
-            print_x_elements(test_suite_objects); 
             return test_suite_objects;
         }
 
@@ -90,26 +89,83 @@ namespace junit_composer
             return test_objects;
         }
 
-        private static XDocument build_test_case_document(List<XElement> test_cases)
+
+        // we cant use generics to call a types method without reflection. it's safer to just
+        // use additional parms..
+        private static XElement return_xelement(XElement xelt = null, XDocument xdoc = null)
+        {
+            if ( ( xelt != null && xdoc != null ) || (xelt == null && xdoc == null) ) { 
+                throw new Exception("Library implementation exception: can't call with these params.");
+            }
+            IEnumerator<XElement> suite_enumerator; 
+            if (xelt != null) {
+                suite_enumerator = xelt.Descendants(testsuite).GetEnumerator(); 
+            } else
+            {
+                suite_enumerator = xdoc.Descendants(testsuites).GetEnumerator();
+            }
+            suite_enumerator.MoveNext();
+            return suite_enumerator.Current;
+        }
+
+        private static XDocument set_up_junit_document()
         {
             XDocument res_doc = new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes")
                 );
-            res_doc.Add(new XElement(testsuite));
+            res_doc.Add(new XElement(testsuites));
+            return res_doc;     
+        }
 
+
+        private static XElement add_single_testsuite(XDocument res_doc)
+        {
+            // we grab the testsuites elt:
+            XElement testsuites_obj = return_xelement(xdoc: res_doc);
+            testsuites_obj.Add(new XElement(testsuite));
+
+            //we greab the testsuite elt:
+            XElement testsuite_obj = return_xelement(xelt: testsuites_obj);
+            return testsuites_obj;
+        }
+
+        private static XDocument build_test_case_document(List<XElement> test_cases)
+        {
+            XDocument res_doc = set_up_junit_document();
+
+            // we grab the testsuite elt:
+            XElement testsuite_obj = add_single_testsuite(res_doc);
+
+            // add all testcase elemnts to the testsuite:
             foreach (XElement xelt in test_cases.Descendants(testsuite))
             {
-                // adding to XDocument not List. No AddAll().
-                res_doc.Add(xelt);
+                testsuite_obj.Add(xelt);
             }
             return res_doc;
         }
 
+        private static XDocument build_test_suite_document(List<XElement> test_suites)
+        {
+            XDocument res_doc = set_up_junit_document();
+            IEnumerator<XElement> test_suite_elt = res_doc.Descendants(testsuite).GetEnumerator();
+            test_suite_elt.MoveNext();
+            XElement test_suite = test_suite_elt.Current;
+            foreach (XElement suite in test_suites)
+            {
+                test_suite.Add(suite);
+            }
+            return res_doc;
+        }
 
         // public functions:
+        public static List<string> gather_junit_files()
+        {
+            return new List<string>();
+        }
+
+       
 
         /// <summary>
-
         /// </summary>
         /// <param name="targets"></param>
         /// <returns>        
@@ -123,7 +179,8 @@ namespace junit_composer
             {
                 test_suites.AddRange(ExtractTestSuites(filename: target));
             }
-            return "";
+            XDocument test_suite_doc = build_test_case_document(test_suites);
+            return test_suite_doc.ToString();
         }
 
 
@@ -143,7 +200,7 @@ namespace junit_composer
             }
             XDocument test_case_doc = build_test_case_document(test_cases);
 
-            return "";
+            return test_case_doc.ToString();
         }
        
     }

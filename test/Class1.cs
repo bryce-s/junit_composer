@@ -26,7 +26,7 @@ namespace test
         [Test]
         public void test_suites_spec()
         {
-           // Composer.ComposeTestSuites(build_filename(spec_example));
+           Composer.ComposeTestSuites(build_filename(spec_example));
         }
 
         [Test]

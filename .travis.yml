@@ -9,4 +9,5 @@ script:
   - nunit-console --help
   - nunit-console --version
   - nunit-console /home/travis/build/bryce-s/junit_composer/test/bin/Debug/test.dll
-  - find . -name "*.nunit*"
+  - ls
+  - find . -name "*xml*"

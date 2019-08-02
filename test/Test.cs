@@ -3,6 +3,7 @@ using NUnit.Framework;
 using junit_composer;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace test
 {
@@ -104,6 +105,89 @@ namespace test
         }
 
 
+
+        [Test]
+        public void header_check()
+        {
+            XDocument xdoc = Composer.set_up_junit_document();
+            string expected = String.Format("{0}", "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>");
+            Assert.True(xdoc.Declaration.ToString() == expected);
+        }
+
+
+        // checks the testsuites node exsits
+        [Test]
+        public void header_check_testsuite()
+        {
+            XDocument xdoc = Composer.set_up_junit_document();
+            Assert.True(xdoc.ToString() == "<testsuites />");
+        }
+
+        [Test]
+        public void header_check_empty()
+        {
+            XDocument xdoc = Composer.set_up_junit_document(testsuites_b: false);
+            Assert.True(xdoc.ToString() == "");
+        }
+
+
+
+        [Test]
+        public void create_single_testsuite()
+        {
+            XDocument xdoc = Composer.set_up_junit_document(testsuites_b: false);
+            Composer.add_single_testsuite(xdoc);
+            Assert.True(xdoc.ToString() == "<testsuite />");
+        }
+
+
+        [Test]
+        public void create_single_no_init()
+        {
+            XDocument xdoc = new XDocument();
+            Composer.add_single_testsuite(xdoc);
+            Assert.True(xdoc.ToString() == "<testsuite />");
+        }
+
+
+        [Test]
+        public void test_return_xelement_errors()
+        {
+            string library_usage_exception = "Library usage exception: can't call with these params.";
+            try
+            {
+                Composer.return_xelement(null, null);
+            }
+            catch (Exception e)
+            {
+                Assert.True(e.Message == library_usage_exception);
+            }
+            try
+            {
+                Composer.return_xelement(new XElement("testsuite"), new XDocument());
+            } catch (Exception e)
+            {
+                Assert.True(e.Message == library_usage_exception);
+            }
+        }
+
+        [Test]
+        public void add_attributes_zero()
+        {
+            XDocument xdoc = Composer.set_up_junit_document();
+            var xei = xdoc.Descendants("testsuites").GetEnumerator();
+            xei.MoveNext();
+            var xelt = xei.Current;
+            Composer.add_attributes(xelt);
+            string xdoc_str = xdoc.ToString();
+            string correc_str = "<testsuites tests=\"0\" failures=\"0\" errors=\"0\" />";
+            Assert.True(correc_str == xdoc_str);
+
+        }
+
+
+        // System-level tests:
+
         [Test]
         public void suites_spec_tags_present()
         {
@@ -151,6 +235,7 @@ namespace test
             string res = Composer.ComposeTestCases(build_filename(spec_example));
             string correct_string_unsanitized = read_correct_file(spec_example, mode_cases);
             Assert.True(diff_stings(res, correct_string_unsanitized));
+            
         }
 
 

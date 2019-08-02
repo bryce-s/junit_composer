@@ -1,8 +1,14 @@
 ﻿using System;
 using System.Xml.Linq;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 
-namespace junit_composer
+
+#if DEBUG
+[assembly: InternalsVisibleTo("test")]
+#endif
+    namespace junit_composer
 {
      public static class Composer
     {
@@ -31,7 +37,7 @@ namespace junit_composer
 
         // .Select() not working for Xelement doc, will use helper:
 
-        private static List<Type> IEnumerableToList<Type>(IEnumerable<Type> nodes)
+        internal static List<Type> IEnumerableToList<Type>(IEnumerable<Type> nodes)
         {
             List<Type> elements = new List<Type>();
             foreach (Type xelt in nodes)
@@ -42,7 +48,7 @@ namespace junit_composer
         }
 
 
-        private static void print_x_elements(List<XElement> nodes)
+        internal static void print_x_elements(List<XElement> nodes)
         {
             foreach (XElement n in nodes)
             {
@@ -51,7 +57,7 @@ namespace junit_composer
         }
 
         // returns one or more testsuite classes.
-        private static List<XElement> ExtractTestSuites(string filename)
+        internal static List<XElement> ExtractTestSuites(string filename)
         {
             List<XElement> test_suite_objects = new List<XElement>();
             XDocument xdoc = OpenXmlFile(filename);
@@ -78,7 +84,7 @@ namespace junit_composer
         }
 
 
-        private static List<XElement> ExtractTestCases(string filename)
+        internal static List<XElement> ExtractTestCases(string filename)
         {
             List<XElement> test_objects = new List<XElement>();
             List<XElement> test_suite_list = ExtractTestSuites(filename);
@@ -99,10 +105,11 @@ namespace junit_composer
 
         // we cant use generics to call a types method without reflection. it's safer to just
         // use additional parms..
-        private static XElement return_xelement(XElement xelt = null, XDocument xdoc = null)
+        // note: bad code, not used in library.
+        internal static XElement return_xelement(XElement xelt = null, XDocument xdoc = null)
         {
             if ( ( xelt != null && xdoc != null ) || (xelt == null && xdoc == null) ) { 
-                throw new Exception("Library implementation exception: can't call with these params.");
+                throw new Exception("Library usage exception: can't call with these params.");
             }
             IEnumerator<XElement> suite_enumerator; 
             if (xelt != null) {
@@ -115,7 +122,7 @@ namespace junit_composer
             return suite_enumerator.Current;
         }
 
-        private static XDocument set_up_junit_document(bool testsuites_b = true)
+        internal static XDocument set_up_junit_document(bool testsuites_b = true)
         {
             XDocument res_doc = new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes")
@@ -129,27 +136,25 @@ namespace junit_composer
 
 
         // returns a testsuite xelement
-        private static XElement add_single_testsuite(XDocument xdoc)
+        internal static XElement add_single_testsuite(XDocument xdoc)
         {
             xdoc.Add(new XElement(testsuite));
             IEnumerator<XElement> testsuite_enumerator = xdoc.Descendants(testsuite).GetEnumerator();
             testsuite_enumerator.MoveNext();
-
-
 
             XElement suite = testsuite_enumerator.Current;
             return suite;
         }
 
 
-        private static void zero_totals()
+        internal static void zero_totals()
         {
             test_total = 0;
             failure_total = 0;
             error_total = 0;
         }
 
-        private static void log_tests_failures_errors(XElement testsuite)
+        internal static void log_tests_failures_errors(XElement testsuite)
         {
             XAttribute tests = testsuite.Attribute("tests");
             XAttribute failures = testsuite.Attribute("failures");
@@ -176,14 +181,14 @@ namespace junit_composer
         } 
 
         // testsuite or testsuites works on param
-        static private void add_attributes(XElement test_suite_obj)
+        internal static void add_attributes(XElement test_obj)
         {
-            test_suite_obj.Add(new XAttribute("tests", test_total.ToString()));
-            test_suite_obj.Add(new XAttribute("failures", failure_total.ToString()));
-            test_suite_obj.Add(new XAttribute("errors", error_total.ToString()));
+            test_obj.Add(new XAttribute("tests", test_total.ToString()));
+            test_obj.Add(new XAttribute("failures", failure_total.ToString()));
+            test_obj.Add(new XAttribute("errors", error_total.ToString()));
         }
         
-        private static XDocument build_test_suites(List<XElement> test_cases)
+        internal static XDocument build_test_suites(List<XElement> test_cases)
         {
             XDocument res_doc = set_up_junit_document();
 
@@ -204,7 +209,7 @@ namespace junit_composer
             return res_doc;
         }
 
-        private static XDocument build_test_suite(List<XElement> test_cases)
+        internal static XDocument build_test_suite(List<XElement> test_cases)
         {
             XDocument res_doc = set_up_junit_document(testsuites_b: false);
             add_single_testsuite(res_doc);
@@ -221,7 +226,7 @@ namespace junit_composer
         }
 
 
-        private static string append_encoding(XDocument doc)
+        internal static string append_encoding(XDocument doc)
         {
             return String.Format("{0}{1}{2}", doc.Declaration.ToString(), Environment.NewLine, doc.ToString());
         }
@@ -273,6 +278,18 @@ namespace junit_composer
 
             return append_encoding(test_case_doc);
         }
+
+
+        /// <summary>
+        /// Gathers all junit files
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <returns>a string[] of files containing '.junit'</returns>
+        public static string[] gather_junit_files(string directory)
+        {
+            return Directory.GetFiles(directory, "*.junit*", SearchOption.AllDirectories);
+        }
+
        
     }
 }

@@ -4,6 +4,7 @@ using junit_composer;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Collections.Generic;
 
 namespace test
 {
@@ -182,8 +183,26 @@ namespace test
             string xdoc_str = xdoc.ToString();
             string correc_str = "<testsuites tests=\"0\" failures=\"0\" errors=\"0\" />";
             Assert.True(correc_str == xdoc_str);
-
         }
+        
+        [Test]
+        public void build_suite_empty()
+        {
+            List<XElement> test_cases = new List<XElement>();
+            XDocument xdoc = Composer.build_test_suite(test_cases);
+            Assert.True(xdoc.ToString() == "<testsuite tests=\"0\" failures=\"0\" errors=\"0\" />");
+        }
+
+        [Test]
+        public void build_test_suites_empty()
+        {
+            List<XElement> test_cases = new List<XElement>();
+            XDocument xdoc = Composer.build_test_suites(test_cases);
+            string correct = "<testsuites tests=\"0\" failures=\"0\" errors=\"0\" />";
+            Assert.True(correct == xdoc.ToString());
+        }
+
+
 
 
         // System-level tests:

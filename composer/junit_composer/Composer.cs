@@ -24,11 +24,11 @@ using System.Runtime.CompilerServices;
 
         }
 
-        private static string testsuite = "testsuite";
-        private static string testsuites = "testsuites";
-        private static string unexpected_child_elt = "Unexpected child element found while parsing.";
+        private static string Testsuite = "testsuite";
+        private static string Testsuites = "testsuites";
+        private static string UnexpectedChildElt = "Unexpected child element found while parsing.";
 
-        private static int test_total, failure_total, error_total = 0;
+        private static int TestTotal, FailureTotal, ErrorTotal = 0;
 
         private static XDocument OpenXmlFile(string filename)
         {
@@ -48,7 +48,7 @@ using System.Runtime.CompilerServices;
         }
 
 
-        internal static void print_x_elements(List<XElement> nodes)
+        internal static void PrintXElements(List<XElement> nodes)
         {
             foreach (XElement n in nodes)
             {
@@ -59,102 +59,102 @@ using System.Runtime.CompilerServices;
         // returns one or more testsuite classes.
         internal static List<XElement> ExtractTestSuites(string filename)
         {
-            List<XElement> test_suite_objects = new List<XElement>();
+            List<XElement> testSuiteObjects = new List<XElement>();
             XDocument xdoc = OpenXmlFile(filename);
-            IEnumerable<XElement> test_node = xdoc.Elements();
+            IEnumerable<XElement> testNode = xdoc.Elements();
             // there's no reason we can't have multiple
             // testsuites, or simply emit testsuites alltogether
             // (i.e. use a testsuite)
             // in most cases, though, there will only be one xelt.
-            foreach (XElement xelt in test_node)
+            foreach (XElement xelt in testNode)
             {
-                if (xelt.Name.LocalName == testsuites)
+                if (xelt.Name.LocalName == Testsuites)
                 {
-                    test_suite_objects.AddRange(IEnumerableToList<XElement>(xelt.Descendants(testsuite)));
+                    testSuiteObjects.AddRange(IEnumerableToList<XElement>(xelt.Descendants(Testsuite)));
                 }
-                else if (xelt.Name.LocalName == testsuite) { 
-                    test_suite_objects.Add(xelt);
+                else if (xelt.Name.LocalName == Testsuite) { 
+                    testSuiteObjects.Add(xelt);
                 }
                 else
                 {
-                    throw new BadJunitFileException(unexpected_child_elt);
+                    throw new BadJunitFileException(UnexpectedChildElt);
                 }
             }
-            return test_suite_objects;
+            return testSuiteObjects;
         }
 
 
         internal static List<XElement> ExtractTestCases(string filename)
         {
-            List<XElement> test_objects = new List<XElement>();
-            List<XElement> test_suite_list = ExtractTestSuites(filename);
+            List<XElement> testObjects = new List<XElement>();
+            List<XElement> testSuiteList = ExtractTestSuites(filename);
 
             // reset static vars
             zero_totals();
 
             // we know they're all testsuite objects. We can extract the test cases only
             // and return those. Then manually build the suite and header.
-            foreach (XElement test_suite in test_suite_list)
+            foreach (XElement testSuite in testSuiteList)
             {
-                test_objects.AddRange(test_suite.Descendants("testcase"));
-                log_tests_failures_errors(test_suite);
+                testObjects.AddRange(testSuite.Descendants("testcase"));
+                LogTestsAndFailures(testSuite);
             }
-            return test_objects;
+            return testObjects;
         }
 
 
         // we cant use generics to call a types method without reflection. it's safer to just
         // use additional parms..
         // note: bad code, not used in library.
-        internal static XElement return_xelement(XElement xelt = null, XDocument xdoc = null)
+        internal static XElement returnXelement(XElement xelt = null, XDocument xdoc = null)
         {
             if ( ( xelt != null && xdoc != null ) || (xelt == null && xdoc == null) ) { 
                 throw new Exception("Library usage exception: can't call with these params.");
             }
-            IEnumerator<XElement> suite_enumerator; 
+            IEnumerator<XElement> suiteEnumerator; 
             if (xelt != null) {
-                suite_enumerator = xelt.Descendants(testsuite).GetEnumerator(); 
+                suiteEnumerator = xelt.Descendants(Testsuite).GetEnumerator(); 
             } else
             {
-                suite_enumerator = xdoc.Descendants(testsuites).GetEnumerator();
+                suiteEnumerator = xdoc.Descendants(Testsuites).GetEnumerator();
             }
-            suite_enumerator.MoveNext();
-            return suite_enumerator.Current;
+            suiteEnumerator.MoveNext();
+            return suiteEnumerator.Current;
         }
 
-        internal static XDocument set_up_junit_document(bool testsuites_b = true)
+        internal static XDocument SetUpJunitDocument(bool testsuites_b = true)
         {
-            XDocument res_doc = new XDocument(
+            XDocument resDoc = new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes")
                 );
             if (testsuites_b)
             {
-                res_doc.Add(new XElement(testsuites));
+                resDoc.Add(new XElement(Testsuites));
             }
-            return res_doc;     
+            return resDoc;     
         }
 
 
         // returns a testsuite xelement
-        internal static XElement add_single_testsuite(XDocument xdoc)
+        internal static XElement addSingleTestsuite(XDocument xdoc)
         {
-            xdoc.Add(new XElement(testsuite));
-            IEnumerator<XElement> testsuite_enumerator = xdoc.Descendants(testsuite).GetEnumerator();
-            testsuite_enumerator.MoveNext();
+            xdoc.Add(new XElement(Testsuite));
+            IEnumerator<XElement> testsuiteEnumerator = xdoc.Descendants(Testsuite).GetEnumerator();
+            testsuiteEnumerator.MoveNext();
 
-            XElement suite = testsuite_enumerator.Current;
+            XElement suite = testsuiteEnumerator.Current;
             return suite;
         }
 
 
         internal static void zero_totals()
         {
-            test_total = 0;
-            failure_total = 0;
-            error_total = 0;
+            TestTotal = 0;
+            FailureTotal = 0;
+            ErrorTotal = 0;
         }
 
-        internal static void log_tests_failures_errors(XElement testsuite)
+        internal static void LogTestsAndFailures(XElement testsuite)
         {
             XAttribute tests = testsuite.Attribute("tests");
             XAttribute failures = testsuite.Attribute("failures");
@@ -163,15 +163,15 @@ using System.Runtime.CompilerServices;
             {
                 if (tests != null)
                 {
-                    test_total += Convert.ToInt32(tests.Value.ToString());
+                    TestTotal += Convert.ToInt32(tests.Value.ToString());
                 }
                 if (errors != null)
                 {
-                    error_total += Convert.ToInt32(errors.Value.ToString());
+                    ErrorTotal += Convert.ToInt32(errors.Value.ToString());
                 }
                 if (failures != null)
                 {
-                    failure_total += Convert.ToInt32(failures.Value.ToString());
+                    FailureTotal += Convert.ToInt32(failures.Value.ToString());
                 }
             }
             catch (InvalidCastException e)
@@ -181,39 +181,40 @@ using System.Runtime.CompilerServices;
         } 
 
         // testsuite or testsuites works on param
-        internal static void add_attributes(XElement test_obj)
+        internal static void addAttributes(XElement testObj)
         {
-            test_obj.Add(new XAttribute("tests", test_total.ToString()));
-            test_obj.Add(new XAttribute("failures", failure_total.ToString()));
-            test_obj.Add(new XAttribute("errors", error_total.ToString()));
+            testObj.Add(new XAttribute("tests", TestTotal.ToString()));
+            testObj.Add(new XAttribute("failures", FailureTotal.ToString()));
+            testObj.Add(new XAttribute("errors", ErrorTotal.ToString()));
         }
         
-        internal static XDocument build_test_suites(List<XElement> test_cases)
+        internal static XDocument BuildTestSuites(List<XElement> test_cases)
         {
-            XDocument res_doc = set_up_junit_document();
+            XDocument res_doc = SetUpJunitDocument();
 
             // we grab the testsuite elt:
-            IEnumerator<XElement> testsuites_iter = res_doc.Descendants(testsuites).GetEnumerator();
-            testsuites_iter.MoveNext();
-            XElement testsuites_obj = testsuites_iter.Current;
+            IEnumerator<XElement> testsuitesIter = res_doc.Descendants(Testsuites).GetEnumerator();
+            testsuitesIter.MoveNext();
+            XElement testsuites_obj = testsuitesIter.Current;
+
 
             zero_totals();
             // add all testsuite element to the testsuites:
             foreach (XElement testsuite in test_cases)
             {
                 testsuites_obj.Add(testsuite);
-                log_tests_failures_errors(testsuite);
+                LogTestsAndFailures(testsuite);
              
             }
-            add_attributes(testsuites_obj);
+            addAttributes(testsuites_obj);
             return res_doc;
         }
 
-        internal static XDocument build_test_suite(List<XElement> test_cases)
+        internal static XDocument BuildTestSuite(List<XElement> test_cases)
         {
-            XDocument res_doc = set_up_junit_document(testsuites_b: false);
-            add_single_testsuite(res_doc);
-            IEnumerator<XElement> test_suite_elt = res_doc.Descendants(testsuite).GetEnumerator();
+            XDocument resDoc = SetUpJunitDocument(testsuites_b: false);
+            addSingleTestsuite(resDoc);
+            IEnumerator<XElement> test_suite_elt = resDoc.Descendants(Testsuite).GetEnumerator();
             test_suite_elt.MoveNext();
             XElement test_suite = test_suite_elt.Current;
             foreach (XElement tc in test_cases)
@@ -221,19 +222,19 @@ using System.Runtime.CompilerServices;
                 test_suite.Add(tc);
                 
             }
-            add_attributes(test_suite);
-            return res_doc;
+            addAttributes(test_suite);
+            return resDoc;
         }
 
 
-        internal static string append_encoding(XDocument doc)
+        internal static string AppendEncoding(XDocument doc)
         {
             return $"{doc.Declaration.ToString()}{Environment.NewLine}{doc.ToString()}";
         }
 
 
         // public functions:
-        public static List<string> gather_junit_files()
+        public static List<string> GatherJunitFiles()
         {
             return new List<string>();
         }
@@ -249,14 +250,14 @@ using System.Runtime.CompilerServices;
         /// </returns>
         public static string ComposeTestSuites(params string[] targets)
         {
-            List<XElement> test_suites = new List<XElement>();
+            List<XElement> testSuites = new List<XElement>();
             foreach (string target in targets)
             {
-                test_suites.AddRange(ExtractTestSuites(filename: target));
+                testSuites.AddRange(ExtractTestSuites(filename: target));
             }
-            XDocument test_suite_doc = build_test_suites(test_suites);
+            XDocument TestSuiteDoc = BuildTestSuites(testSuites);
        
-            return append_encoding(test_suite_doc);
+            return AppendEncoding(TestSuiteDoc);
         }
 
 
@@ -269,14 +270,14 @@ using System.Runtime.CompilerServices;
         /// </returns>
         public static string ComposeTestCases(params string[] targets)
         {
-            List<XElement> test_cases = new List<XElement>();
+            List<XElement> testCases = new List<XElement>();
             foreach (string target in targets)
             {
-                test_cases.AddRange(ExtractTestCases(target));
+                testCases.AddRange(ExtractTestCases(target));
             }
-            XDocument test_case_doc = build_test_suite(test_cases);
+            XDocument testCaseDoc = BuildTestSuite(testCases);
 
-            return append_encoding(test_case_doc);
+            return AppendEncoding(testCaseDoc);
         }
 
 
@@ -285,11 +286,9 @@ using System.Runtime.CompilerServices;
         /// </summary>
         /// <param name="directory"></param>
         /// <returns>a string[] of files containing '.junit'</returns>
-        public static string[] gather_junit_files(string directory)
+        public static string[] GatherJunitFiles(string directory)
         {
             return Directory.GetFiles(directory, "*.junit*", SearchOption.AllDirectories);
         }
-
-       
     }
 }

@@ -90,7 +90,7 @@ using System.Runtime.CompilerServices;
             List<XElement> testSuiteList = ExtractTestSuites(filename);
 
             // reset static vars
-            zero_totals();
+            ZeroTotals();
 
             // we know they're all testsuite objects. We can extract the test cases only
             // and return those. Then manually build the suite and header.
@@ -106,7 +106,7 @@ using System.Runtime.CompilerServices;
         // we cant use generics to call a types method without reflection. it's safer to just
         // use additional parms..
         // note: bad code, not used in library.
-        internal static XElement returnXelement(XElement xelt = null, XDocument xdoc = null)
+        internal static XElement ReturnXelement(XElement xelt = null, XDocument xdoc = null)
         {
             if ( ( xelt != null && xdoc != null ) || (xelt == null && xdoc == null) ) { 
                 throw new Exception("Library usage exception: can't call with these params.");
@@ -136,7 +136,7 @@ using System.Runtime.CompilerServices;
 
 
         // returns a testsuite xelement
-        internal static XElement addSingleTestsuite(XDocument xdoc)
+        internal static XElement AddSingleTestSuite(XDocument xdoc)
         {
             xdoc.Add(new XElement(Testsuite));
             IEnumerator<XElement> testsuiteEnumerator = xdoc.Descendants(Testsuite).GetEnumerator();
@@ -147,7 +147,7 @@ using System.Runtime.CompilerServices;
         }
 
 
-        internal static void zero_totals()
+        internal static void ZeroTotals()
         {
             TestTotal = 0;
             FailureTotal = 0;
@@ -198,7 +198,7 @@ using System.Runtime.CompilerServices;
             XElement testsuites_obj = testsuitesIter.Current;
 
 
-            zero_totals();
+            ZeroTotals();
             // add all testsuite element to the testsuites:
             foreach (XElement testsuite in test_cases)
             {
@@ -213,7 +213,7 @@ using System.Runtime.CompilerServices;
         internal static XDocument BuildTestSuite(List<XElement> test_cases)
         {
             XDocument resDoc = SetUpJunitDocument(testsuites_b: false);
-            addSingleTestsuite(resDoc);
+            AddSingleTestSuite(resDoc);
             IEnumerator<XElement> test_suite_elt = resDoc.Descendants(Testsuite).GetEnumerator();
             test_suite_elt.MoveNext();
             XElement test_suite = test_suite_elt.Current;

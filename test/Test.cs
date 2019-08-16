@@ -133,7 +133,7 @@ namespace test
         public void CreateSingleTestsuite()
         {
             XDocument xdoc = Composer.SetUpJunitDocument(testsuites_b: false);
-            Composer.addSingleTestsuite(xdoc);
+            Composer.AddSingleTestSuite(xdoc);
             Assert.True(xdoc.ToString() == "<testsuite />");
         }
 
@@ -142,7 +142,7 @@ namespace test
         public void CreateSingleNoInit()
         {
             XDocument xdoc = new XDocument();
-            Composer.addSingleTestsuite(xdoc);
+            Composer.AddSingleTestSuite(xdoc);
             Assert.True(xdoc.ToString() == "<testsuite />");
         }
 
@@ -153,7 +153,7 @@ namespace test
             string libraryUsageException = "Library usage exception: can't call with these params.";
             try
             {
-                Composer.returnXelement(null, null);
+                Composer.ReturnXelement(null, null);
             }
             catch (Exception e)
             {
@@ -161,7 +161,7 @@ namespace test
             }
             try
             {
-                Composer.returnXelement(new XElement("testsuite"), new XDocument());
+                Composer.ReturnXelement(new XElement("testsuite"), new XDocument());
             } catch (Exception e)
             {
                 Assert.True(e.Message == libraryUsageException);

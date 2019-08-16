@@ -228,7 +228,7 @@ using System.Runtime.CompilerServices;
 
         internal static string append_encoding(XDocument doc)
         {
-            return String.Format("{0}{1}{2}", doc.Declaration.ToString(), Environment.NewLine, doc.ToString());
+            return $"{doc.Declaration.ToString()}{Environment.NewLine}{doc.ToString()}";
         }
 
 

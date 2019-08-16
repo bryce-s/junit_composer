@@ -27,7 +27,7 @@ namespace test
         static private string build_filename(string test_target)
         {
             string context = get_test_cwd();
-            string test_target_path = String.Format("test_files{0}{1}", Path.DirectorySeparatorChar, test_target);
+            string test_target_path = $"test_files{Path.DirectorySeparatorChar}{test_target}";
             return Path.Combine(context, test_target_path);
         }
 
@@ -48,7 +48,7 @@ namespace test
 
         static private void match_tag(string tag, string input)
         {
-            string pattern = String.Format(@"<{0}[\s\S]+<\/{0}>", tag);
+            string pattern = $@"<{tag}[\s\S]+<\/{tag}>";
             Match m = Regex.Match(input, pattern, RegexOptions.ECMAScript);
             Assert.True(m.Success);
         }
@@ -57,7 +57,7 @@ namespace test
         static private string read_correct_file(string filename, string mode)
         {
             string context = get_test_cwd();
-            string target = String.Format("correct{0}{1}-{2}.correct", Path.DirectorySeparatorChar, filename, mode);
+            string target = $"correct{Path.DirectorySeparatorChar}{filename}-{mode}.correct"; 
             string target_path = Path.Combine(context, target);
             return File.ReadAllText(target_path);
         }

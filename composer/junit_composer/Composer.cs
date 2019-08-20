@@ -176,7 +176,7 @@ using System.Runtime.CompilerServices;
             }
             catch (InvalidCastException e)
             {
-                throw (new BadJunitFileException("testsuite element attributes for tests, value, error must be integers."));
+                throw (new BadJunitFileException($"{e}testsuite element attributes for tests, value, error must be integers."));
             }
         } 
 
